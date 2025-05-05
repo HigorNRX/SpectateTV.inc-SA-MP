@@ -22,3 +22,8 @@ Um sistema básico de espectador para SA:MP, permitindo que um jogador observe o
 StartSpectate(playerid, target);         // Inicia o modo espectador no 'target'
 StopSpectate(playerid);                  // Encerra o modo espectador
 GetTargetSpectatePlayer(playerid);       // Retorna o ID do jogador sendo observado
+
+## ⚙️ CallBacks
+public OnPlayerStartSpectate(playerid, target); // Chamado ao iniciar espectador
+public OnPlayerStopSpectate(playerid);          // Chamado ao parar espectador
+public UpdateSpectate(playerid, target);        // Chamado para atualizar estado do espectador
