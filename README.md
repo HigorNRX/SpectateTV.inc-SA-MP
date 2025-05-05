@@ -1,6 +1,6 @@
 # 📺 Simples Sistema de Espectador
 
-Um sistema básico de espectador para SA:MP, permitindo que um jogador observe outro jogador facilmente.
+Um sistema básico de espectador para SA:MP, permitindo que um jogador observe outro jogador sem interrupções.
 
 > 🛠 Desenvolvido por **Galo**  
 > 📅 Iniciado em **24/05/2025**  
@@ -10,20 +10,20 @@ Um sistema básico de espectador para SA:MP, permitindo que um jogador observe o
 
 ## 📌 Funcionalidades
 
-- Início e parada de espectador com controle por player.
+- Início e parada de espectador.
 - Retorno do alvo atual sendo observado.
-- Callbacks personalizáveis para integração com o seu sistema.
+- Callbacks para integração com o seu sistema.
 
 ---
 
 ## ⚙️ Funções
-
 ```pawn
 StartSpectate(playerid, target);         // Inicia o modo espectador no 'target'
 StopSpectate(playerid);                  // Encerra o modo espectador
 GetTargetSpectatePlayer(playerid);       // Retorna o ID do jogador sendo observado
-
+```
 ## ⚙️ CallBacks
+```pawn
 public OnPlayerStartSpectate(playerid, target); // Chamado ao iniciar espectador
 public OnPlayerStopSpectate(playerid);          // Chamado ao parar espectador
 public UpdateSpectate(playerid, target);        // Chamado para atualizar estado do espectador
