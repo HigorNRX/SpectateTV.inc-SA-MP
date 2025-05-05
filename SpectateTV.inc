@@ -1,4 +1,4 @@
-// Simples sistema de espectador 24/05/2025 by Sysner
+// Simples sistema de espectador 24/05/2025 by Galo
 /*
     v0.0.1 03/04/2025
         
@@ -7,7 +7,7 @@
 
 */
 /*
-FunÁ„es
+Fun√ß√£es
     StartSpectate(playerid, target);
     StopSpectate(playerid);
     GetTargetSpectatePlayer(playerid);
@@ -160,7 +160,7 @@ SpectateNow(playerid, IDTarget)
     return 1;
 }
 
-// ComeÁar assistir um jogador
+// Come√ßar assistir um jogador
 StartSpectate(playerid, IDTarget)
 {
     if(!IsPlayerConnected(playerid))
@@ -196,7 +196,7 @@ StopSpectate(playerid)
     return 1;
 }
 
-// Pegar o Id que o Player est· Spectator
+// Pegar o Id que o Player est√° Spectator
 GetTargetSpectatePlayer(playerid) { return IDSpectateTarget[playerid]; }
 
 
