@@ -12,6 +12,7 @@ Um sistema básico de espectador para SA:MP, permitindo que um jogador observe o
 
 - Início e parada de espectador.
 - Callbacks para integração com o seu sistema.
+- Camera de morte
 
 ---
 
