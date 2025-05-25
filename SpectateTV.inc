@@ -1,16 +1,10 @@
-// Simples sistema de espectador 24/05/2025 by Galo
+// Simples sistema de espectador dinamico by Galo v0.1.1
 /*
-    v0.0.1 03/04/2025
-        
-
-
-
-*/
-/*
-Fun√ß√£es
+FunÁ„es
     StartSpectate(playerid, target);
     StopSpectate(playerid);
     GetTargetSpectatePlayer(playerid);
+    IsPlayerModeSpectateTV(playerid);
 
 CallBacks
    public OnPlayerStartSpectate(playerid, target);
@@ -19,13 +13,15 @@ CallBacks
 
 */
 
+#if !defined _FOREACH_LOCAL_VERSION
+    #error "Please include foreach"
+#endif
+
 forward OnPlayerStartSpectate(playerid, TargetID);
 forward OnPlayerStopSpectate(playerid, TargetID);
 forward UpdateSpectate(playerid, TargetID);
 
-new IDTempSpecSys[MAX_PLAYERS] = 0;
-new IDSpectateTarget[MAX_PLAYERS] = -1;
-new oldPlayerVirtualWorld[MAX_PLAYERS] = 0;
+new IDTempSpecSys[MAX_PLAYERS], IDSpectateTarget[MAX_PLAYERS], oldPlayerVirtualWorld[MAX_PLAYERS];
 
 public OnPlayerDisconnect(playerid, reason)
 {
@@ -36,6 +32,19 @@ public OnPlayerDisconnect(playerid, reason)
     #endif
     return 1;
 }
+
+public OnPlayerConnect(playerid)
+{
+    IDTempSpecSys[playerid]             = -1;
+    IDSpectateTarget[playerid]          = -1;
+    oldPlayerVirtualWorld[playerid]     = -1;
+
+    #if defined SysTV_OnPlayerConnect
+        SysTV_OnPlayerConnect(playerid);
+    #endif
+    return 1;
+}
+
 public OnPlayerStateChange(playerid, newstate, oldstate) 
 {
 	if (newstate == PLAYER_STATE_DRIVER || newstate == PLAYER_STATE_PASSENGER) 
@@ -85,12 +94,20 @@ public OnPlayerInteriorChange(playerid, newinteriorid, oldinteriorid) {
 
 public OnPlayerSpawn(playerid) 
 {
-	foreach(new x : Player)
+    if(IsPlayerModeSpectateTV(playerid))
     {
-        if(IDSpectateTarget[x] == playerid)
-            SpectateNow(x, playerid);
+        TogglePlayerSpectating(playerid, 1);
+        SpectateNow(playerid, GetTargetSpectatePlayer(playerid));
+    }    
+    else
+    {
+        foreach(new x : Player)
+        {
+            if(IDSpectateTarget[x] == playerid)
+                SpectateNow(x, playerid);
+        }
     }
-    
+
     #if defined SysTV_OnPlayerSpawn
         SysTV_OnPlayerSpawn(playerid);
     #endif
@@ -98,25 +115,38 @@ public OnPlayerSpawn(playerid)
 	return 1;
 }
 
+forward CamKillSpectate(playerid, TargetID);
+public CamKillSpectate(playerid, TargetID)
+{
+    new Float:POSx, Float:POSy, Float:POSz;
+    GetPlayerPos(playerid, POSx, POSy, POSz);
+
+    new Float:cx, Float:cy, Float:cz;
+    GetPlayerCameraPos(playerid, cx, cy, cz);
+
+    cz += !GetPlayerInterior(playerid) ? 5.0 : 0.5;
+
+    SetPlayerCameraPos(TargetID, cx, cy, cz);
+    SetPlayerCameraLookAt(TargetID, POSx, POSy, POSz);
+    return 1;
+}
+
 public OnPlayerDeath(playerid, killerid, reason) 
 {
-    foreach(new x : Player)
+    if(!IsPlayerModeSpectateTV(playerid))
     {
-        if(IDSpectateTarget[x] == playerid)
+        foreach(new x : Player)
         {
-            new Float:POSx, Float:POSy, Float:POSz;
-            GetPlayerPos(playerid, POSx, POSy, POSz);
-
-            new Float:cx, Float:cy, Float:cz;
-            GetPlayerCameraPos(playerid, cx, cy, cz);
-
-            cz += !GetPlayerInterior(playerid) ? 5.0 : 0.5;
-
-            SetPlayerCameraPos(x, cx, cy, cz);
-			SetPlayerCameraLookAt(x, POSx, POSy, POSz);
+            if(IDSpectateTarget[x] == playerid)
+            {
+                TogglePlayerSpectating(x, 1);
+                SetTimerEx("CamKillSpectate", 300, false, "ii", playerid, x);
+                
+            }
         }
     }
 
+    
     #if defined SysTV_OnPlayerDeath
         SysTV_OnPlayerDeath(playerid, killerid, reason);
     #endif
@@ -134,6 +164,7 @@ public UpdateSpecSys(playerid, IDTarget)
 	}
 
     CallLocalFunction("UpdateSpectate", "ii", playerid, IDTarget); 
+
     return 1;
 }
 
@@ -141,41 +172,41 @@ SpectateNow(playerid, IDTarget)
 {
     
     new IDPlayerState = GetPlayerState(IDTarget);
+    oldPlayerVirtualWorld[IDTarget] = GetPlayerVirtualWorld(IDTarget);
 
     if((IDPlayerState == PLAYER_STATE_ONFOOT) || (IDPlayerState == PLAYER_STATE_DRIVER) || (IDPlayerState == PLAYER_STATE_PASSENGER))
     {
         if(!IsPlayerInAnyVehicle(IDTarget))
         {
             SetPlayerInterior(playerid,GetPlayerInterior(IDTarget));
-            SetPlayerVirtualWorld(playerid,GetPlayerVirtualWorld(IDTarget));
+            SetPlayerVirtualWorld(playerid,oldPlayerVirtualWorld[IDTarget]);
             PlayerSpectatePlayer(playerid, IDTarget, 1);
         }
         else
         {
             SetPlayerInterior(playerid,GetPlayerInterior(IDTarget));
-            SetPlayerVirtualWorld(playerid,GetPlayerVirtualWorld(IDTarget));
+            SetPlayerVirtualWorld(playerid,oldPlayerVirtualWorld[IDTarget]);
             PlayerSpectateVehicle(playerid,GetPlayerVehicleID(IDTarget), 1);
         }
     }
     return 1;
 }
 
-// Come√ßar assistir um jogador
+// ComeÁar assistir um jogador
 StartSpectate(playerid, IDTarget)
 {
-    if(!IsPlayerConnected(playerid))
+    if(!IsPlayerConnected(IDTarget) || IsPlayerModeSpectateTV(IDTarget) || !IsPlayerConnected(playerid) || playerid == IDTarget)
         return 0;
-    if(!IsPlayerConnected(IDTarget))
-        return 0;
-
+        
+    // Finalizar outro Spectate
     if(IDSpectateTarget[playerid] != -1)
     {
         CallLocalFunction("OnPlayerStopSpectate", "ii", playerid,IDSpectateTarget[playerid]);     
         IDSpectateTarget[playerid] = -1;
-        KillTimer(IDTempSpecSys[playerid]);  
     }
-    else
-        TogglePlayerSpectating(playerid, 1);
+    
+    KillTimer(IDTempSpecSys[playerid]);  
+    TogglePlayerSpectating(playerid, 1);
     
     IDSpectateTarget[playerid] = IDTarget;
     SpectateNow(playerid, IDTarget);
@@ -187,6 +218,9 @@ StartSpectate(playerid, IDTarget)
 // Para de assistir um jogador
 StopSpectate(playerid)
 {
+    if(!IsPlayerConnected(playerid))
+        return 0;
+
     if(IDSpectateTarget[playerid] != -1)
         CallLocalFunction("OnPlayerStopSpectate", "ii", playerid,IDSpectateTarget[playerid]);
     
@@ -196,9 +230,26 @@ StopSpectate(playerid)
     return 1;
 }
 
-// Pegar o Id que o Player est√° Spectator
-GetTargetSpectatePlayer(playerid) { return IDSpectateTarget[playerid]; }
+// Pegar o Id que o jogador est· assistindo
+GetTargetSpectatePlayer(playerid) 
+{ 
+    if(!IsPlayerConnected(playerid))
+        return -1;
+        
+    return IDSpectateTarget[playerid]; 
+}
 
+// Verificar se o Jogador est· no modo spectator dinamico
+IsPlayerModeSpectateTV(playerid)
+{
+    if(!IsPlayerConnected(playerid))
+        return 0;
+
+    if(IDSpectateTarget[playerid] != -1)
+        return 1;
+    else
+        return 0;
+}
 
 // Method ALS OnPlayerDisconnect
     #if defined _ALS_OnPlayerDisconnect
@@ -211,6 +262,19 @@ GetTargetSpectatePlayer(playerid) { return IDSpectateTarget[playerid]; }
 
     #if defined SysTV_OnPlayerDisconnect
         forward OnPlayerDisconnect(playerid, reason);
+    #endif
+
+// Method ALS OnPlayerConnect
+    #if defined _ALS_OnPlayerConnect
+        #undef OnPlayerConnect
+    #else
+        #define _ALS_OnPlayerConnect
+    #endif
+
+    #define OnPlayerConnect SysTV_OnPlayerConnect
+
+    #if defined SysTV_OnPlayerConnect
+        forward OnPlayerConnect(playerid);
     #endif
 
 // Method ALS OnPlayerStateChange
