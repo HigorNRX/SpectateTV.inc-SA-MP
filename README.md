@@ -2,16 +2,15 @@
 
 Um sistema básico de espectador para SA:MP, permitindo que um jogador observe outro jogador sem interrupções.
 
-> 🛠 Desenvolvido por **Galo**  
-> 📅 Iniciado em **24/05/2025**  
-> 📦 Versão: `v0.0.1` (03/04/2025)
+> 🛠 Desenvolvido por **HigorNRX - Galo**  
+> 📅 Iniciado em **03/04/2025**  
+> 📦 Versão: `v0.1.1` (24/05/2025)
 
 ---
 
 ## 📌 Funcionalidades
 
 - Início e parada de espectador.
-- Retorno do alvo atual sendo observado.
 - Callbacks para integração com o seu sistema.
 
 ---
@@ -21,9 +20,10 @@ Um sistema básico de espectador para SA:MP, permitindo que um jogador observe o
 StartSpectate(playerid, target);         // Inicia o modo espectador no 'target'
 StopSpectate(playerid);                  // Encerra o modo espectador
 GetTargetSpectatePlayer(playerid);       // Retorna o ID do jogador sendo observado
+IsPlayerModeSpectateTV(playerid);        // Verificar se o jogador está no modo espectador
 ```
 ## ⚙️ CallBacks
 ```pawn
 public OnPlayerStartSpectate(playerid, target); // Chamado ao iniciar espectador
 public OnPlayerStopSpectate(playerid);          // Chamado ao parar espectador
-public UpdateSpectate(playerid, target);        // Chamado para atualizar estado do espectador
+public UpdateSpectate(playerid, target);        // Chamado para atualizar a cena
