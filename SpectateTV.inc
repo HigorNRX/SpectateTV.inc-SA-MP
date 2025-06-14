@@ -1,4 +1,4 @@
-// Simples sistema de espectador dinamico by Galo v0.1.1
+// Simples sistema de espectador dinamico by HigorNrx Galo v0.1.2
 /*
 Funçães
     StartSpectate(playerid, target);
@@ -118,6 +118,9 @@ public OnPlayerSpawn(playerid)
 forward CamKillSpectate(playerid, TargetID);
 public CamKillSpectate(playerid, TargetID)
 {
+    if(!IsPlayerModeSpectateTV(TargetID))
+        return 1;
+
     new Float:POSx, Float:POSy, Float:POSz;
     GetPlayerPos(playerid, POSx, POSy, POSz);
 
@@ -226,6 +229,7 @@ StopSpectate(playerid)
     
     IDSpectateTarget[playerid] = -1;
     TogglePlayerSpectating(playerid, 0);
+    SetCameraBehindPlayer(playerid);
     KillTimer(IDTempSpecSys[playerid]);    
     return 1;
 }
