@@ -4,7 +4,7 @@ Um sistema básico de espectador para SA:MP, permitindo que um jogador observe o
 
 > 🛠 Desenvolvido por **HigorNRX - Galo**  
 > 📅 Iniciado em **03/04/2025**  
-> 📦 Versão: `v0.1.1` (24/05/2025)
+> 📦 Versão: `v0.1.2` (13/06/2025)
 
 ---
 
